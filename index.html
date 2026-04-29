@@ -1033,28 +1033,72 @@ function renderQuiz() {
   qs.forEach(function(q) {
     var done = answered[q.id] !== undefined;
     var ua = answered[q.id];
+
+    // Create card
     var card = document.createElement("div");
     card.className = "quiz-card";
     card.id = "qcard-" + q.id;
 
-    var optsHtml = q.opts.map(function(o, i) {
-      var cls = "quiz-option";
+    // Meta row
+    var meta = document.createElement("div");
+    meta.className = "quiz-meta";
+    meta.innerHTML = "<span class=\"quiz-unit-tag\">" + q.unit + "</span><span class=\"quiz-type-tag\">" + q.type + "</span>";
+    card.appendChild(meta);
+
+    // Question
+    var qEl = document.createElement("div");
+    qEl.className = "quiz-question";
+    qEl.textContent = q.q;
+    card.appendChild(qEl);
+
+    // Options
+    var optsEl = document.createElement("div");
+    optsEl.className = "quiz-options";
+    q.opts.forEach(function(o, i) {
+      var opt = document.createElement("div");
+      opt.className = "quiz-option";
       if (done) {
-        cls += " disabled";
-        if (i === q.ans) cls += " correct";
-        else if (i === ua) cls += " incorrect";
+        opt.classList.add("disabled");
+        if (i === q.ans) opt.classList.add("correct");
+        else if (i === ua) opt.classList.add("incorrect");
       }
-      return "<div class=\"" + cls + "\" onclick=\"selectAnswer(" + q.id + "," + i + ",this)\">" +
-        "<span class=\"option-letter\">" + L[i] + "</span><span>" + o + "</span></div>";
-    }).join("");
+      var letter = document.createElement("span");
+      letter.className = "option-letter";
+      letter.textContent = L[i];
+      var text = document.createElement("span");
+      text.textContent = o;
+      opt.appendChild(letter);
+      opt.appendChild(text);
+      if (!done) {
+        (function(optEl, idx) {
+          optEl.addEventListener("click", function() {
+            selectAnswer(q.id, idx, optEl);
+          });
+        })(opt, i);
+      }
+      optsEl.appendChild(opt);
+    });
+    card.appendChild(optsEl);
 
-    var submitHtml = done ? "" : "<button class=\"quiz-submit-btn\" id=\"sbtn-" + q.id + "\" onclick=\"submitAnswer(" + q.id + ")\" disabled>Check Answer</button>";
-    var expHtml = "<div class=\"quiz-explanation" + (done ? " show" : "") + "\" id=\"exp-" + q.id + "\">" + q.exp + "</div>";
+    // Submit button
+    if (!done) {
+      var btn = document.createElement("button");
+      btn.className = "quiz-submit-btn";
+      btn.id = "sbtn-" + q.id;
+      btn.textContent = "Check Answer";
+      btn.disabled = true;
+      (function(qid) {
+        btn.addEventListener("click", function() { submitAnswer(qid); });
+      })(q.id);
+      card.appendChild(btn);
+    }
 
-    card.innerHTML = "<div class=\"quiz-meta\"><span class=\"quiz-unit-tag\">" + q.unit + "</span><span class=\"quiz-type-tag\">" + q.type + "</span></div>" +
-      "<div class=\"quiz-question\">" + q.q + "</div>" +
-      "<div class=\"quiz-options\">" + optsHtml + "</div>" +
-      submitHtml + expHtml;
+    // Explanation
+    var exp = document.createElement("div");
+    exp.className = "quiz-explanation" + (done ? " show" : "");
+    exp.id = "exp-" + q.id;
+    exp.innerHTML = q.exp;
+    card.appendChild(exp);
 
     container.appendChild(card);
   });
