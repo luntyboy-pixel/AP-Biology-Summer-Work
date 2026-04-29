@@ -1183,6 +1183,7 @@ renderQuiz();
 
 // ── TRACKING & REGISTRATION ──
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwbOYyoqw3EJoDDqR9QZWzOeQvkod45q56OxmQSCiNdjc_kFDt8_bf1t9dy4OpV47LBew/exec';
+// Replace above with your Google Apps Script Web App URL after deployment
 
 const SECTIONS_LIST = ['foundations','units','vocabulary','quiz','practices'];
 
@@ -1317,11 +1318,12 @@ async function syncToServer() {
   const dot = document.getElementById('sync-dot');
   if (dot) dot.classList.add('syncing');
   try {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'upsertStudent', student }),
-      headers: { 'Content-Type': 'application/json' }
+    // Use GET with URL params to avoid CORS preflight issues
+    const params = new URLSearchParams({
+      action: 'upsertStudent',
+      student: JSON.stringify(student)
     });
+    await fetch(SCRIPT_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
   } catch(e) { /* silent fail — data is safe in localStorage */ }
   if (dot) { dot.classList.remove('syncing'); }
 }
