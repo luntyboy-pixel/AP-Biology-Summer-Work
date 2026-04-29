@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP Biology — Teacher Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a2744;--navy-mid:#2c3e6b;--teal:#1d6e6e;--teal-light:#2a9090;
+  --gold:#c9a227;--cream:#faf8f3;--white:#fff;
+  --gray-100:#f4f4f0;--gray-200:#e8e6e0;--gray-400:#9a9690;--gray-600:#5a5652;
+  --text:#1e1c18;--text-light:#4a4642;--correct:#2a7a4a;--warn:#c9a227;--danger:#8a1a1a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Source Sans 3',sans-serif;background:var(--gray-100);color:var(--text);font-size:15px;line-height:1.6;}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,var(--teal) 100%);}
+.login-card{background:white;border-radius:12px;padding:2.5rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.login-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:.25rem;}
+.login-sub{font-size:.83rem;color:var(--text-light);margin-bottom:2rem;}
+.login-label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:.4rem;}
+.login-input{width:100%;padding:.7rem 1rem;border:1.5px solid var(--gray-200);border-radius:6px;font-size:.95rem;font-family:'Source Sans 3',sans-serif;transition:border .2s;}
+.login-input:focus{outline:none;border-color:var(--teal);}
+.login-btn{width:100%;margin-top:1.25rem;padding:.8rem;background:var(--navy);color:white;border:none;border-radius:6px;font-size:.95rem;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:background .2s;}
+.login-btn:hover{background:var(--navy-mid);}
+.login-error{display:none;color:var(--danger);font-size:.83rem;margin-top:.75rem;text-align:center;}
+
+/* DASHBOARD */
+#dashboard{display:none;}
+header{background:var(--navy);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+.h-brand{font-family:'Playfair Display',serif;color:white;font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:.6rem;}
+.ap-badge{background:var(--gold);color:var(--navy);font-size:.6rem;font-weight:700;letter-spacing:.08em;padding:2px 6px;border-radius:2px;text-transform:uppercase;}
+.h-actions{display:flex;gap:.75rem;align-items:center;}
+.h-btn{padding:6px 14px;border-radius:5px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:all .2s;border:1.5px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);background:transparent;}
+.h-btn:hover{background:rgba(255,255,255,.1);color:white;}
+.h-btn.primary{background:var(--teal);border-color:var(--teal);color:white;}
+.h-btn.primary:hover{background:var(--teal-light);}
+
+.main{max-width:1200px;margin:0 auto;padding:2rem;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem;}
+.stat-card{background:white;border-radius:8px;padding:1.25rem 1.5rem;border:1px solid var(--gray-200);}
+.stat-label{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-light);margin-bottom:.4rem;}
+.stat-value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--navy);line-height:1;}
+.stat-sub{font-size:.78rem;color:var(--text-light);margin-top:.3rem;}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:1.25rem;}
+.search-input{padding:.55rem 1rem;border:1.5px solid var(--gray-200);border-radius:6px;font-size:.88rem;font-family:'Source Sans 3',sans-serif;width:220px;transition:border .2s;}
+.search-input:focus{outline:none;border-color:var(--teal);}
+.filter-sel{padding:.55rem .875rem;border:1.5px solid var(--gray-200);border-radius:6px;font-size:.85rem;font-family:'Source Sans 3',sans-serif;background:white;cursor:pointer;}
+.export-btn{padding:.55rem 1.1rem;background:var(--teal);color:white;border:none;border-radius:6px;font-size:.83rem;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;margin-left:auto;}
+.export-btn:hover{background:var(--teal-light);}
+
+/* TABLE */
+.table-wrap{background:white;border-radius:8px;border:1px solid var(--gray-200);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--navy);color:white;}
+th{padding:.75rem 1rem;text-align:left;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+th.sortable{cursor:pointer;user-select:none;}
+th.sortable:hover{background:var(--navy-mid);}
+td{padding:.75rem 1rem;font-size:.88rem;border-bottom:1px solid var(--gray-200);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--gray-100);}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:.72rem;font-weight:700;}
+.badge-done{background:rgba(42,122,74,.12);color:var(--correct);}
+.badge-progress{background:rgba(201,162,39,.15);color:#8a6c00;}
+.badge-not-started{background:var(--gray-100);color:var(--gray-600);}
+.score-cell{font-weight:700;font-size:.93rem;}
+.score-high{color:var(--correct);}
+.score-mid{color:#8a6c00;}
+.score-low{color:var(--danger);}
+.topic-mini{display:flex;gap:3px;flex-wrap:wrap;}
+.topic-dot{width:10px;height:10px;border-radius:50%;display:inline-block;title:'';}
+.topic-label{font-size:.7rem;color:var(--text-light);}
+.last-seen{font-size:.8rem;color:var(--text-light);}
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--text-light);}
+.empty-state h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--navy);margin-bottom:.5rem;}
+.empty-state p{font-size:.9rem;max-width:400px;margin:0 auto;}
+
+/* TOPIC BREAKDOWN */
+.topic-row td{padding:.5rem 1rem;}
+.topic-bar-wrap{display:flex;align-items:center;gap:.75rem;}
+.topic-bar-bg{flex:1;height:8px;background:var(--gray-200);border-radius:4px;overflow:hidden;min-width:80px;}
+.topic-bar-fill{height:100%;border-radius:4px;transition:width .5s;}
+
+/* DETAIL MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:1rem;}
+.modal-bg.open{display:flex;}
+.modal{background:white;border-radius:12px;padding:2rem;max-width:620px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--navy);}
+.modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--gray-400);line-height:1;}
+.modal-close:hover{color:var(--text);}
+.modal-section{margin-bottom:1.25rem;}
+.modal-section h4{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-light);margin-bottom:.6rem;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+.detail-item{background:var(--gray-100);border-radius:6px;padding:.6rem .875rem;}
+.detail-item-label{font-size:.72rem;color:var(--text-light);margin-bottom:.2rem;}
+.detail-item-val{font-weight:600;font-size:.93rem;color:var(--navy);}
+
+/* SETUP INSTRUCTIONS */
+.setup-panel{background:white;border-radius:8px;border:1px solid var(--gray-200);padding:1.5rem;margin-bottom:2rem;display:none;}
+.setup-panel.visible{display:block;}
+.setup-panel h3{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:1rem;}
+.setup-steps{list-style:none;counter-reset:step;}
+.setup-steps li{counter-increment:step;display:flex;gap:.875rem;padding:.6rem 0;border-bottom:1px solid var(--gray-200);font-size:.87rem;align-items:flex-start;}
+.setup-steps li:last-child{border-bottom:none;}
+.setup-steps li::before{content:counter(step);background:var(--navy);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;margin-top:1px;}
+.code-inline{background:var(--gray-100);border:1px solid var(--gray-200);padding:1px 6px;border-radius:3px;font-family:monospace;font-size:.83rem;}
+
+/* REFRESH STATUS */
+.refresh-bar{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;font-size:.82rem;color:var(--text-light);}
+.refresh-dot{width:8px;height:8px;border-radius:50%;background:var(--correct);}
+.refresh-dot.stale{background:var(--warn);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">AP® Biology</div>
+    <div class="login-sub">Teacher Dashboard · Summer 2025</div>
+    <label class="login-label" for="pw">Dashboard Password</label>
+    <input class="login-input" type="password" id="pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">Sign In</button>
+    <div class="login-error" id="login-error">Incorrect password. Please try again.</div>
+    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--gray-200);font-size:.78rem;color:var(--text-light);">
+      <strong>Default password:</strong> <span class="code-inline">apbio2025</span><br>
+      Change this in the script before deploying.
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <header>
+    <div class="h-brand"><span class="ap-badge">AP</span>Biology · Teacher Dashboard</div>
+    <div class="h-actions">
+      <span id="last-refresh-label" style="font-size:.78rem;color:rgba(255,255,255,.55);"></span>
+      <button class="h-btn primary" onclick="loadData()">↺ Refresh</button>
+      <button class="h-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- SETUP INSTRUCTIONS (shown when no script URL set) -->
+    <div class="setup-panel" id="setup-panel">
+      <h3>⚙️ One-time Setup Required</h3>
+      <p style="font-size:.88rem;color:var(--text-light);margin-bottom:1rem;">Before student data will appear here, you need to connect a Google Apps Script. This takes about 5 minutes and only needs to be done once.</p>
+      <ol class="setup-steps">
+        <li>Go to <strong>script.google.com</strong> and click <em>New Project</em></li>
+        <li>Paste the code from <span class="code-inline">google_apps_script.js</span> (included in your download) into the editor</li>
+        <li>Click <strong>Deploy → New Deployment → Web App</strong>. Set "Who has access" to <em>Anyone</em></li>
+        <li>Copy the <strong>Web App URL</strong> provided after deployment</li>
+        <li>Open <span class="code-inline">student_site.html</span> and paste the URL into the <span class="code-inline">SCRIPT_URL</span> variable at the top of the JavaScript section</li>
+        <li>Do the same in this file — paste the URL into the <span class="code-inline">SCRIPT_URL</span> variable below</li>
+        <li>Re-upload both files to your hosting (Netlify/GitHub Pages) — that's it!</li>
+      </ol>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card"><div class="stat-label">Students Registered</div><div class="stat-value" id="stat-total">—</div><div class="stat-sub">have accessed the site</div></div>
+      <div class="stat-card"><div class="stat-label">Quiz Attempts</div><div class="stat-value" id="stat-attempts">—</div><div class="stat-sub">questions answered total</div></div>
+      <div class="stat-card"><div class="stat-label">Avg. Score</div><div class="stat-value" id="stat-avg">—</div><div class="stat-sub">across all students</div></div>
+      <div class="stat-card"><div class="stat-label">Completed All Sections</div><div class="stat-value" id="stat-complete">—</div><div class="stat-sub">students fully done</div></div>
+    </div>
+
+    <!-- TOPIC AVG BREAKDOWN -->
+    <div class="table-wrap" style="margin-bottom:1.5rem;">
+      <table>
+        <thead><tr><th>Topic</th><th>Avg. Score</th><th>Performance</th><th>Students Attempted</th></tr></thead>
+        <tbody id="topic-summary-body"></tbody>
+      </table>
+    </div>
+
+    <!-- STUDENT TABLE -->
+    <div class="toolbar">
+      <input class="search-input" type="text" id="search" placeholder="Search by name..." oninput="renderTable()">
+      <select class="filter-sel" id="filter-status" onchange="renderTable()">
+        <option value="all">All Students</option>
+        <option value="complete">Completed</option>
+        <option value="progress">In Progress</option>
+        <option value="not-started">Quiz Not Started</option>
+      </select>
+      <select class="filter-sel" id="sort-by" onchange="renderTable()">
+        <option value="name">Sort: Name</option>
+        <option value="score">Sort: Score (High→Low)</option>
+        <option value="last-seen">Sort: Last Active</option>
+        <option value="progress">Sort: Progress</option>
+      </select>
+      <button class="export-btn" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+
+    <div class="refresh-bar">
+      <div class="refresh-dot" id="refresh-dot"></div>
+      <span id="refresh-status">Loading student data…</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>First Accessed</th>
+            <th>Last Active</th>
+            <th>Sections Visited</th>
+            <th>Questions Answered</th>
+            <th>Overall Score</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="student-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// ── CONFIGURATION ──
+// Paste your Google Apps Script Web App URL here after setup:
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwbOYyoqw3EJoDDqR9QZWzOeQvkod45q56OxmQSCiNdjc_kFDt8_bf1t9dy4OpV47LBew/exec';
+const DASHBOARD_PASSWORD = "Underdog170318"; // Change this before deploying
+
+const TOPICS = [
+  {key:'chemistry', label:'Chemistry of Life', color:'#1d6e6e'},
+  {key:'cells',     label:'Cells',             color:'#2c5f8a'},
+  {key:'energetics',label:'Energetics',         color:'#7a4a1a'},
+  {key:'comms',     label:'Cell Communication', color:'#5a3a8a'},
+  {key:'genetics',  label:'Genetics',           color:'#1d4e6e'},
+  {key:'evolution', label:'Evolution',          color:'#2c6e2c'},
+  {key:'ecology',   label:'Ecology',            color:'#7a5c1a'},
+];
+
+const SECTIONS = ['foundations','units','vocabulary','quiz','practices'];
+
+let allStudents = [];
+let lastRefresh = null;
+
+// ── AUTH ──
+function login() {
+  const pw = document.getElementById('pw').value;
+  if (pw === DASHBOARD_PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    sessionStorage.setItem('dash-auth', '1');
+    if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+      document.getElementById('setup-panel').classList.add('visible');
+    }
+    loadData();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('dash-auth');
+  location.reload();
+}
+
+if (sessionStorage.getItem('dash-auth')) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    document.getElementById('setup-panel').classList.add('visible');
+  }
+  loadData();
+}
+
+// ── DATA ──
+async function loadData() {
+  document.getElementById('refresh-status').textContent = 'Fetching latest data…';
+  document.getElementById('refresh-dot').classList.add('stale');
+
+  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    // Use demo data so the dashboard is usable before setup
+    allStudents = generateDemoData();
+    finishLoad();
+    return;
+  }
+
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getAll');
+    const data = await res.json();
+    allStudents = data.students || [];
+    finishLoad();
+  } catch(e) {
+    document.getElementById('refresh-status').textContent = 'Could not load data — check your Script URL';
+    document.getElementById('refresh-dot').classList.add('stale');
+  }
+}
+
+function finishLoad() {
+  lastRefresh = new Date();
+  document.getElementById('refresh-dot').classList.remove('stale');
+  document.getElementById('refresh-status').textContent = `Last updated: ${lastRefresh.toLocaleTimeString()}`;
+  document.getElementById('last-refresh-label').textContent = lastRefresh.toLocaleTimeString();
+  updateStats();
+  renderTopicSummary();
+  renderTable();
+}
+
+function generateDemoData() {
+  const names = ['Emma Johnson','Liam Chen','Sofia Patel','Noah Williams','Ava Thompson','Ethan Davis','Isabella Martinez','Mason Brown','Charlotte Wilson','Oliver Taylor','Amelia Anderson','Elijah Garcia','Harper Moore','James Jackson','Evelyn White','Benjamin Harris','Abigail Martin','Lucas Thompson','Emily Robinson','Henry Lewis'];
+  const now = Date.now();
+  return names.map((name, i) => {
+    const sectionsVisited = SECTIONS.slice(0, Math.floor(Math.random() * 6));
+    const topicScores = {};
+    TOPICS.forEach(t => {
+      if (Math.random() > 0.3) {
+        const correct = Math.floor(Math.random() * 11);
+        topicScores[t.key] = { correct, total: 10 };
+      }
+    });
+    const totalCorrect = Object.values(topicScores).reduce((a,b) => a + b.correct, 0);
+    const totalQ = Object.values(topicScores).reduce((a,b) => a + b.total, 0);
+    return {
+      id: 'demo-' + i,
+      name,
+      firstAccess: new Date(now - (30 - i) * 86400000 - Math.random() * 86400000).toISOString(),
+      lastAccess: new Date(now - Math.floor(Math.random() * 14) * 86400000 - Math.random() * 86400000).toISOString(),
+      sectionsVisited,
+      topicScores,
+      totalCorrect,
+      totalQ,
+      overallPct: totalQ > 0 ? Math.round(totalCorrect / totalQ * 100) : null
+    };
+  });
+}
+
+// ── STATS ──
+function updateStats() {
+  document.getElementById('stat-total').textContent = allStudents.length;
+  const totalQ = allStudents.reduce((a,s) => a + (s.totalQ || 0), 0);
+  document.getElementById('stat-attempts').textContent = totalQ;
+  const withScores = allStudents.filter(s => s.totalQ > 0);
+  const avg = withScores.length ? Math.round(withScores.reduce((a,s) => a + s.overallPct, 0) / withScores.length) : 0;
+  document.getElementById('stat-avg').textContent = withScores.length ? avg + '%' : '—';
+  const complete = allStudents.filter(s => s.sectionsVisited && s.sectionsVisited.length >= 5 && s.totalQ >= 30).length;
+  document.getElementById('stat-complete').textContent = complete;
+}
+
+function renderTopicSummary() {
+  const tbody = document.getElementById('topic-summary-body');
+  tbody.innerHTML = TOPICS.map(t => {
+    const students = allStudents.filter(s => s.topicScores && s.topicScores[t.key] && s.topicScores[t.key].total > 0);
+    const avg = students.length ? Math.round(students.reduce((a,s) => a + (s.topicScores[t.key].correct / s.topicScores[t.key].total * 100), 0) / students.length) : null;
+    const barColor = avg === null ? '#ccc' : avg >= 70 ? '#2a7a4a' : avg >= 50 ? '#c9a227' : '#8a1a1a';
+    return `<tr class="topic-row">
+      <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${t.color};margin-right:8px;vertical-align:middle;"></span>${t.label}</td>
+      <td style="font-weight:700;color:${barColor}">${avg !== null ? avg + '%' : '—'}</td>
+      <td><div class="topic-bar-wrap"><div class="topic-bar-bg"><div class="topic-bar-fill" style="width:${avg||0}%;background:${barColor}"></div></div></div></td>
+      <td>${students.length} / ${allStudents.length}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── TABLE ──
+function renderTable() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  const sortBy = document.getElementById('sort-by').value;
+
+  let rows = allStudents.filter(s => {
+    if (search && !s.name.toLowerCase().includes(search)) return false;
+    if (status === 'complete' && !(s.sectionsVisited?.length >= 5 && s.totalQ >= 30)) return false;
+    if (status === 'progress' && !(s.sectionsVisited?.length > 0 && s.totalQ < 30)) return false;
+    if (status === 'not-started' && s.totalQ > 0) return false;
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    if (sortBy === 'score') return (b.overallPct||0) - (a.overallPct||0);
+    if (sortBy === 'last-seen') return new Date(b.lastAccess) - new Date(a.lastAccess);
+    if (sortBy === 'progress') return (b.sectionsVisited?.length||0) - (a.sectionsVisited?.length||0);
+    return a.name.localeCompare(b.name);
+  });
+
+  const tbody = document.getElementById('student-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><h3>No students yet</h3><p>Once students access the site and enter their name, they'll appear here automatically.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(s => {
+    const scoreColor = s.overallPct === null ? '' : s.overallPct >= 70 ? 'score-high' : s.overallPct >= 50 ? 'score-mid' : 'score-low';
+    const sectCount = s.sectionsVisited?.length || 0;
+    const status = sectCount >= 5 && (s.totalQ || 0) >= 30 ? '<span class="badge badge-done">Complete</span>'
+      : sectCount > 0 ? '<span class="badge badge-progress">In Progress</span>'
+      : '<span class="badge badge-not-started">Not Started</span>';
+    const firstDate = s.firstAccess ? new Date(s.firstAccess).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
+    const lastDate = s.lastAccess ? new Date(s.lastAccess).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+    const topicDots = TOPICS.map(t => {
+      const ts = s.topicScores?.[t.key];
+      const pct = ts?.total ? ts.correct/ts.total*100 : null;
+      const col = pct === null ? '#e8e6e0' : pct >= 70 ? '#2a7a4a' : pct >= 50 ? '#c9a227' : '#8a1a1a';
+      return `<span class="topic-dot" style="background:${col}" title="${t.label}: ${pct !== null ? Math.round(pct)+'%' : 'not attempted'}"></span>`;
+    }).join('');
+    return `<tr>
+      <td><strong>${s.name}</strong></td>
+      <td class="last-seen">${firstDate}</td>
+      <td class="last-seen">${lastDate}</td>
+      <td>${sectCount} / ${SECTIONS.length} <span style="font-size:.75rem;color:var(--text-light)">${SECTIONS.slice(0,sectCount).join(', ')||'none'}</span></td>
+      <td>${s.totalQ || 0} answered</td>
+      <td class="score-cell ${scoreColor}">${s.overallPct !== null ? s.overallPct + '%' : '—'}</td>
+      <td>${status}</td>
+      <td><button onclick="openModal('${s.id}')" style="padding:4px 12px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:4px;font-size:.78rem;cursor:pointer;font-family:'Source Sans 3',sans-serif;">Detail</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── MODAL ──
+function openModal(id) {
+  const s = allStudents.find(x => x.id === id);
+  if (!s) return;
+
+  const topicRows = TOPICS.map(t => {
+    const ts = s.topicScores?.[t.key];
+    const pct = ts?.total ? Math.round(ts.correct/ts.total*100) : null;
+    const col = pct === null ? '#ccc' : pct >= 70 ? '#2a7a4a' : pct >= 50 ? '#c9a227' : '#8a1a1a';
+    return `<tr class="topic-row"><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${t.color};margin-right:6px;"></span>${t.label}</td>
+    <td style="font-weight:700;color:${col}">${pct !== null ? pct + '%' : 'Not attempted'}</td>
+    <td><div class="topic-bar-wrap"><div class="topic-bar-bg" style="min-width:80px"><div class="topic-bar-fill" style="width:${pct||0}%;background:${col}"></div></div></div></td>
+    <td>${ts ? ts.correct + ' / ' + ts.total : '—'}</td></tr>`;
+  }).join('');
+
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">${s.name}</div>
+        <div style="font-size:.82rem;color:var(--text-light);margin-top:.2rem;">Detailed Activity Report</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-section">
+      <h4>Activity Overview</h4>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-item-label">First Accessed</div><div class="detail-item-val">${s.firstAccess ? new Date(s.firstAccess).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long'}) : '—'}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Last Active</div><div class="detail-item-val">${s.lastAccess ? new Date(s.lastAccess).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Sections Visited</div><div class="detail-item-val">${s.sectionsVisited?.length || 0} of ${SECTIONS.length}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Questions Answered</div><div class="detail-item-val">${s.totalQ || 0} of 60</div></div>
+        <div class="detail-item"><div class="detail-item-label">Overall Score</div><div class="detail-item-val">${s.overallPct !== null ? s.overallPct + '%' : 'No attempts yet'}</div></div>
+        <div class="detail-item"><div class="detail-item-label">Correct Answers</div><div class="detail-item-val">${s.totalCorrect || 0} / ${s.totalQ || 0}</div></div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <h4>Score by Topic</h4>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead style="background:var(--gray-100);"><tr><th style="text-align:left;padding:.5rem .75rem;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-light);">Topic</th><th style="text-align:left;padding:.5rem .75rem;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-light);">Score %</th><th style="padding:.5rem .75rem;"></th><th style="text-align:left;padding:.5rem .75rem;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-light);">Correct</th></tr></thead>
+        <tbody>${topicRows}</tbody>
+      </table>
+    </div>
+    <div class="modal-section">
+      <h4>Sections Visited</h4>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        ${SECTIONS.map(sec => `<span style="padding:3px 10px;border-radius:10px;font-size:.78rem;font-weight:600;background:${s.sectionsVisited?.includes(sec) ? 'rgba(29,110,110,.12)' : 'var(--gray-100)'};color:${s.sectionsVisited?.includes(sec) ? 'var(--teal)' : 'var(--gray-400)'};border:1px solid ${s.sectionsVisited?.includes(sec) ? 'rgba(29,110,110,.2)' : 'var(--gray-200)'}">${sec.charAt(0).toUpperCase()+sec.slice(1)}</span>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+}
+
+// ── EXPORT ──
+function exportCSV() {
+  const headers = ['Name','First Accessed','Last Active','Sections Visited','Questions Answered','Overall Score %',...TOPICS.map(t=>t.label+' %')];
+  const rows = allStudents.map(s => [
+    s.name,
+    s.firstAccess ? new Date(s.firstAccess).toLocaleDateString() : '',
+    s.lastAccess ? new Date(s.lastAccess).toLocaleDateString() : '',
+    s.sectionsVisited?.length || 0,
+    s.totalQ || 0,
+    s.overallPct ?? '',
+    ...TOPICS.map(t => {
+      const ts = s.topicScores?.[t.key];
+      return ts?.total ? Math.round(ts.correct/ts.total*100) : '';
+    })
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'ap_bio_summer_scores.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
